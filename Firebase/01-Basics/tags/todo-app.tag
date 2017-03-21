@@ -25,20 +25,38 @@
 		var that = this;
 
 		// STATIC data that eventually will come from Firebase
-		this.fakeData = [{
-			task: "Item A",
-			done: true
-		},{
-			task: "Item B",
-			done: false
-		},{
-			task: "Item C",
-			done: false
-		}];
+		// this.fakeData = [{
+		// 	task: "Item A",
+		// 	done: true
+		// },{
+		// 	task: "Item B",
+		// 	done: false
+		// },{
+		// 	task: "Item C",
+		// 	done: false
+		// }];
 
 		// To understand the event object better see:
 		// http://riotjs.com/guide/#event-handlers
 		// http://riotjs.com/guide/#event-object
+
+
+		this.fakeData = [];
+
+//on is lissening to the todos node in the data base and when is a change in the value. Snapshot is the object that have the value of the change and other information
+		firebase.database().ref('todos').on('value', function(snapshot){
+			console.log(snapshot.val()); //to see what is snapshot
+			var list = [];
+			snapshot.forEach(function(thing){ //listen to every item on the object
+				list.push(thing.val()); //pushing the value to the list
+			});
+			that.fakeData = list; //seting list = to fakeData
+			that.update();
+		})
+
+
+
+
 		addItem(event){
 			var newTask = {};
 			if (event.which === 13) {
@@ -49,6 +67,11 @@
 
 				event.target.value = "";	// RESET INPUT
 				event.target.focus();			// FOCUS BACK ON INPUT
+
+				var key = firebase.database().ref('todos').push().key;
+				firebase.database().ref('todos/' + key).set(newTask);
+
+
 			}
 		}
 
